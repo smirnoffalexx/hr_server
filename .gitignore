@@ -1,0 +1,7 @@
+.env
+.codegpt
+.vscode
+hidden_secrets*.yml
+dops
+.idea
+internal/api/http/docs

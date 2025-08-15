@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:17.2
+    container_name: postgres
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d db -U user"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+  hr-server:
+    image: hr-server:latest
+    container_name: hr-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    ports:
+      - 8080:8080
+    env_file:
+      - .env
