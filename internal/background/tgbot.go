@@ -114,7 +114,16 @@ func (t *TelegramBot) handleStartCommand(message *tgbotapi.Message) (string, err
 		return "", fmt.Errorf("failed to create/update user %d: %v", telegramID, err)
 	}
 
-	msgText := fmt.Sprintf("✅ Добро пожаловать, %s!\n\n👋 Вы успешно зарегистрированы в системе.\n\n💡 Для подключения к каналу используйте команду:\n/start <код_канала>", username)
+	code := "undefined"
+	if channelCode != nil {
+		code = *channelCode
+	}
+
+	msgText := fmt.Sprintf(
+		"✅ Добро пожаловать, %s!\n\n👋 Вы успешно зарегистрированы в системе.\n\n💡 Для подключения к каналу используйте команду:\n/start %s",
+		username,
+		code,
+	)
 
 	logrus.Infof("User %s (ID: %d) registered successfully", username, telegramID)
 	return msgText, nil

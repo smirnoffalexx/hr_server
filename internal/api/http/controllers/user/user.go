@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"hr-server/internal/api/http/controllers/common"
 	"hr-server/internal/api/http/controllers/user/dto"
 	"hr-server/internal/register"
@@ -22,19 +23,20 @@ func NewUserController(sr *register.StorageRegister) *UserController {
 // GetUsers godoc
 // @Summary Get all users
 // @Description Get all registered users
+// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Users
 // @Accept json
 // @Produce json
 // @Success 200 {object} dto.GetUsersResponse
 // @Failure 500 {object} common.ErrorResponse
-// @Security BearerAuth
-// @Router /admin/users [get]
+// @Security XAuthToken
+// @Router /api/users [get]
 func (c *UserController) GetUsersHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		users, err := c.userService.GetAllUsers()
 		if err != nil {
 			logrus.Error("error while get all users: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to get all users: %v", err)})
 			return
 		}
 

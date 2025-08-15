@@ -26,16 +26,7 @@ func (s *UserService) CreateUser(telegramID int64, username string, channelID *i
 	if existingUser != nil {
 		// Update channel if provided
 		if channelID != nil {
-			err = s.userRepo.UpdateChannel(telegramID, channelID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to update user channel: %w", err)
-			}
-
-			// Get updated user
-			existingUser, err = s.userRepo.GetByTelegramID(telegramID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get updated user: %w", err)
-			}
+			existingUser.ChannelID = channelID
 		}
 
 		return existingUser, nil

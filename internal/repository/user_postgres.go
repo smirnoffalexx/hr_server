@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"hr-server/internal/domain"
 	"time"
 
@@ -48,14 +49,6 @@ func (pu PostgresUser) ToDomain() *domain.User {
 	}
 }
 
-func (pu PostgresUserWithChannel) ToDomain() *domain.User {
-	user := pu.PostgresUser.ToDomain()
-	if pu.Channel.ID != 0 {
-		user.Channel = pu.Channel.ToDomain()
-	}
-	return user
-}
-
 type UserRepository struct {
 	db *gorm.DB
 }
@@ -74,7 +67,7 @@ func (r *UserRepository) Create(telegramID int64, username string, channelID *in
 
 	postgresUser := NewPostgresUser(user)
 	if err := r.db.Table(USERS_TABLE_NAME).Create(&postgresUser).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user in database: %w", err)
 	}
 
 	return postgresUser.ToDomain(), nil
@@ -87,7 +80,7 @@ func (r *UserRepository) GetByTelegramID(telegramID int64) (*domain.User, error)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to get user by telegram ID %d: %w", telegramID, err)
 	}
 
 	return postgresUser.ToDomain(), nil
@@ -97,7 +90,7 @@ func (r *UserRepository) GetAll() ([]*domain.User, error) {
 	var postgresUsers []PostgresUser
 
 	if err := r.db.Table(USERS_TABLE_NAME).Find(&postgresUsers).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get all users: %w", err)
 	}
 
 	var users []*domain.User
@@ -112,7 +105,7 @@ func (r *UserRepository) GetByChannel(channelID int) ([]*domain.User, error) {
 	var postgresUsers []PostgresUser
 
 	if err := r.db.Table(USERS_TABLE_NAME).Where("channel_id = ?", channelID).Find(&postgresUsers).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get users by channel %d: %w", channelID, err)
 	}
 
 	var users []*domain.User
@@ -121,8 +114,4 @@ func (r *UserRepository) GetByChannel(channelID int) ([]*domain.User, error) {
 	}
 
 	return users, nil
-}
-
-func (r *UserRepository) UpdateChannel(telegramID int64, channelID *int) error {
-	return r.db.Table(USERS_TABLE_NAME).Where("telegram_id = ?", telegramID).Update("channel_id", channelID).Error
 }

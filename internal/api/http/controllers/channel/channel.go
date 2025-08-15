@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"fmt"
 	"hr-server/internal/api/http/controllers/channel/dto"
 	"hr-server/internal/api/http/controllers/common"
 	"hr-server/internal/register"
@@ -22,6 +23,7 @@ func NewChannelController(sr *register.StorageRegister) *ChannelController {
 // GenerateChannel godoc
 // @Summary Generate a new channel code
 // @Description Generate a new channel code for a specific channel
+// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
@@ -29,7 +31,8 @@ func NewChannelController(sr *register.StorageRegister) *ChannelController {
 // @Success 200 {object} domain.Channel
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
-// @Router /channel/generate [post]
+// @Security XAuthToken
+// @Router /api/channel/generate [post]
 func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateChannelRequest()
@@ -48,7 +51,7 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 		channel, err := c.channelService.GenerateChannel(req.ChannelName)
 		if err != nil {
 			logrus.Error("error while generate channel: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to generate channel: %v", err)})
 			return
 		}
 
@@ -59,6 +62,7 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 // GenerateBulkChannel godoc
 // @Summary Generate multiple channel codes
 // @Description Generate multiple channel codes for a specific channel
+// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
@@ -67,7 +71,7 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /admin/channel/bulk [post]
+// @Router /api/channel/bulk [post]
 func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateBulkChannelRequest()
@@ -86,7 +90,7 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 		channels, err := c.channelService.GenerateBulkChannel(req.ChannelName, req.Count)
 		if err != nil {
 			logrus.Error("error while generate bulk channel: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to generate bulk channel: %v", err)})
 			return
 		}
 
@@ -97,6 +101,7 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 // GetChannelByCode godoc
 // @Summary Get channel by code
 // @Description Get channel information by its code
+// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
@@ -104,7 +109,8 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 // @Success 200 {object} domain.Channel
 // @Failure 404 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
-// @Router /channel/{code} [get]
+// @Security XAuthToken
+// @Router /api/channel/{code} [get]
 func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		code := ctx.Param("code")
@@ -116,7 +122,7 @@ func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister
 		channel, err := c.channelService.GetChannelByCode(code)
 		if err != nil {
 			logrus.Error("error while get channel by code: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to get channel by code '%s': %v", code, err)})
 			return
 		}
 
@@ -132,19 +138,20 @@ func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister
 // GetChannels godoc
 // @Summary Get all channels
 // @Description Get all Telegram channels
+// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
 // @Success 200 {array} domain.Channel
 // @Failure 500 {object} common.ErrorResponse
-// @Security BearerAuth
-// @Router /admin/channels [get]
+// @Security XAuthToken
+// @Router /api/channels [get]
 func (c *ChannelController) GetChannelsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		channels, err := c.channelService.GetAll()
 		if err != nil {
 			logrus.Error("error while get all channels: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to get all channels: %v", err)})
 			return
 		}
 

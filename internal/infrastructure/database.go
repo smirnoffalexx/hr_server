@@ -38,12 +38,12 @@ func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
 		Logger: newLogger,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open postgres connection: %w", err)
 	}
 
 	var version string
 	if err := db.Raw("select version()").Scan(&version).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to check postgres version: %w", err)
 	}
 
 	logrus.Info("PostgreSQL version:", version)

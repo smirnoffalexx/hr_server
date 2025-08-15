@@ -10,5 +10,4 @@ type User struct {
 	ChannelID  *int      `json:"channel_id" db:"channel_id"`
 	CreatedAt  time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
-	Channel    *Channel  `json:"channel,omitempty"`
 }

@@ -1,6 +1,7 @@
 package register
 
 import (
+	"fmt"
 	"hr-server/config"
 	"hr-server/internal/infrastructure"
 	"hr-server/internal/repository"
@@ -31,7 +32,7 @@ func NewStorageRegister(cfg *config.Config) (*StorageRegister, error) {
 
 	db, err := infrastructure.NewPostgresDB(cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create postgres database: %w", err)
 	}
 	sr.db = db
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"hr-server/internal/domain"
 	"time"
 
@@ -57,7 +58,7 @@ func (r *ChannelRepository) Create(name, code string) (*domain.Channel, error) {
 
 	postgresChannel := NewPostgresChannel(channel)
 	if err := r.db.Table(CHANNELS_TABLE_NAME).Create(&postgresChannel).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create channel with name '%s' and code '%s': %w", name, code, err)
 	}
 
 	return postgresChannel.ToDomain(), nil
@@ -70,7 +71,7 @@ func (r *ChannelRepository) GetByCode(code string) (*domain.Channel, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to get channel by code '%s': %w", code, err)
 	}
 
 	return postgresChannel.ToDomain(), nil
@@ -83,7 +84,7 @@ func (r *ChannelRepository) GetByID(id int) (*domain.Channel, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("failed to get channel by ID %d: %w", id, err)
 	}
 
 	return postgresChannel.ToDomain(), nil
@@ -93,7 +94,7 @@ func (r *ChannelRepository) GetAll() ([]*domain.Channel, error) {
 	var postgresChannels []PostgresChannel
 
 	if err := r.db.Table(CHANNELS_TABLE_NAME).Find(&postgresChannels).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get all channels: %w", err)
 	}
 
 	var channels []*domain.Channel

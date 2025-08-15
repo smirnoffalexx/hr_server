@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"fmt"
 	"hr-server/internal/api/http/controllers/common"
 	"hr-server/internal/api/http/controllers/notification/dto"
 	"hr-server/internal/domain"
@@ -23,6 +24,7 @@ func NewNotificationController(sr *register.StorageRegister) *NotificationContro
 // SendNotification godoc
 // @Summary Send notification to all users
 // @Description Send a notification message to all users
+// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Notifications
 // @Accept json
 // @Produce json
@@ -30,8 +32,8 @@ func NewNotificationController(sr *register.StorageRegister) *NotificationContro
 // @Success 200 {object} common.SuccessResponse
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
-// @Security BearerAuth
-// @Router /admin/notifications [post]
+// @Security XAuthToken
+// @Router /api/notifications [post]
 func (c *NotificationController) SendNotificationHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewSendNotificationRequest()
@@ -56,7 +58,7 @@ func (c *NotificationController) SendNotificationHandler(sr *register.StorageReg
 		err := c.notificationService.SendNotification(domainReq)
 		if err != nil {
 			logrus.Error("error while send notification: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to send notification: %v", err)})
 			return
 		}
 

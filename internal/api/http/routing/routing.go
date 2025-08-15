@@ -71,6 +71,9 @@ func SetGinMiddlewares(router *gin.Engine) {
 // @version 1.0.0
 // @description This is the Swagger documentation for the HR Server service.
 // @BasePath /api
+// @securityDefinitions.apikey XAuthToken
+// @in header
+// @name X-Auth-Token
 func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 	// set route handlers
 	apiGroup := router.Group("/api")
@@ -87,7 +90,7 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 	apiGroup.Use(middleware.AuthTokenMiddleware(sr.Config().AuthToken))
 
 	// User routes
-	userGroup := apiGroup.Group("/admin/users")
+	userGroup := apiGroup.Group("/users")
 	userController := user.NewUserController(sr)
 	userGroup.GET("/", userController.GetUsersHandler(sr))
 
@@ -96,13 +99,11 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 	channelController := channel.NewChannelController(sr)
 	channelGroup.POST("/generate", channelController.GenerateChannelHandler(sr))
 	channelGroup.GET("/:code", channelController.GetChannelByCodeHandler(sr))
-
-	adminChannelGroup := apiGroup.Group("/admin/channel")
-	adminChannelGroup.POST("/bulk", channelController.GenerateBulkChannelHandler(sr))
-	adminChannelGroup.GET("/", channelController.GetChannelsHandler(sr))
+	channelGroup.POST("/bulk", channelController.GenerateBulkChannelHandler(sr))
+	channelGroup.GET("/", channelController.GetChannelsHandler(sr))
 
 	// Notification routes
-	notificationGroup := apiGroup.Group("/admin/notifications")
+	notificationGroup := apiGroup.Group("/notifications")
 	notificationController := notification.NewNotificationController(sr)
 	notificationGroup.POST("/", notificationController.SendNotificationHandler(sr))
 
@@ -111,7 +112,5 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 	statsController := stats.NewStatsController(sr)
 	statsGroup.GET("/channels", statsController.GetChannelsStatsHandler(sr))
 	statsGroup.GET("/channel/:code", statsController.GetChannelStatsHandler(sr))
-
-	adminStatsGroup := apiGroup.Group("/admin/stats")
-	adminStatsGroup.GET("/", statsController.GetStatsHandler(sr))
+	statsGroup.GET("/", statsController.GetStatsHandler(sr))
 }

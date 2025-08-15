@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"hr-server/config"
 	"hr-server/internal/app"
 
@@ -17,12 +18,12 @@ func run() error {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		logrus.Error(err)
-		return err
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	if err := app.Run(cfg); err != nil {
 		logrus.Error(err)
-		return err
+		return fmt.Errorf("failed to run app: %w", err)
 	}
 
 	return nil

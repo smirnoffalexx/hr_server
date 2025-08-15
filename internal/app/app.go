@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 	"hr-server/config"
 	"hr-server/internal/api/http/routing"
 	"hr-server/internal/background"
@@ -19,7 +20,7 @@ import (
 
 func Run(cfg *config.Config) error {
 	if err := InitLogger(cfg); err != nil {
-		return err
+		return fmt.Errorf("failed to init logger: %w", err)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -27,7 +28,7 @@ func Run(cfg *config.Config) error {
 
 	sr, err := register.NewStorageRegister(cfg)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create storage register: %w", err)
 	}
 
 	logrus.Info("Service started")
@@ -37,7 +38,7 @@ func Run(cfg *config.Config) error {
 
 	tgBot, err := background.NewTelegramBot(sr)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create telegram bot: %w", err)
 	}
 	go tgBot.Run(ctx, &wg)
 
