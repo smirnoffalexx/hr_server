@@ -64,23 +64,11 @@ func (s *ChannelService) GetChannelByID(id int) (*domain.Channel, error) {
 }
 
 func (s *ChannelService) generateUniqueCode() (string, error) {
-	for {
-		// Generate 8-character hex code
-		bytes := make([]byte, 4)
-		if _, err := rand.Read(bytes); err != nil {
-			return "", fmt.Errorf("failed to generate random bytes: %w", err)
-		}
-
-		code := hex.EncodeToString(bytes)
-
-		// Check if code already exists
-		existing, err := s.channelRepo.GetByCode(code)
-		if err != nil {
-			return "", fmt.Errorf("failed to check existing code: %w", err)
-		}
-
-		if existing == nil {
-			return code, nil
-		}
+	// generate 16-character hex code
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", fmt.Errorf("failed to generate random bytes: %w", err)
 	}
+
+	return hex.EncodeToString(bytes), nil
 }

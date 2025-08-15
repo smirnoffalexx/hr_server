@@ -95,12 +95,12 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 	userGroup.GET("/", userController.GetUsersHandler(sr))
 
 	// Channel routes
-	channelGroup := apiGroup.Group("/channel")
+	channelGroup := apiGroup.Group("/channels")
 	channelController := channel.NewChannelController(sr)
 	channelGroup.POST("/generate", channelController.GenerateChannelHandler(sr))
 	channelGroup.GET("/:code", channelController.GetChannelByCodeHandler(sr))
 	channelGroup.POST("/bulk", channelController.GenerateBulkChannelHandler(sr))
-	channelGroup.GET("/", channelController.GetChannelsHandler(sr))
+	channelGroup.GET("/all", channelController.GetChannelsHandler(sr))
 
 	// Notification routes
 	notificationGroup := apiGroup.Group("/notifications")
@@ -112,5 +112,5 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 	statsController := stats.NewStatsController(sr)
 	statsGroup.GET("/channels", statsController.GetChannelsStatsHandler(sr))
 	statsGroup.GET("/channel/:code", statsController.GetChannelStatsHandler(sr))
-	statsGroup.GET("/", statsController.GetStatsHandler(sr))
+	statsGroup.GET("/all", statsController.GetStatsHandler(sr))
 }

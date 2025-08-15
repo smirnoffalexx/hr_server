@@ -31,7 +31,7 @@ func NewChannelController(sr *register.StorageRegister) *ChannelController {
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /channel/generate [post]
+// @Router /channels/generate [post]
 func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateChannelRequest()
@@ -69,7 +69,7 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /channel/bulk [post]
+// @Router /channels/bulk [post]
 func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateBulkChannelRequest()
@@ -107,7 +107,7 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 // @Failure 404 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /channel/{code} [get]
+// @Router /channels/{code} [get]
 func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		code := ctx.Param("code")
@@ -141,7 +141,7 @@ func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister
 // @Success 200 {array} domain.Channel
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /channels [get]
+// @Router /channels/all [get]
 func (c *ChannelController) GetChannelsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		channels, err := c.channelService.GetAll()

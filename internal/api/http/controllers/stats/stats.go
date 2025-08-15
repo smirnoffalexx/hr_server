@@ -34,7 +34,7 @@ func NewStatsController(sr *register.StorageRegister) *StatsController {
 // @Success 200 {object} dto.GetStatsResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /stats [get]
+// @Router /stats/all [get]
 func (c *StatsController) GetStatsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// This would need to be implemented to get overall stats

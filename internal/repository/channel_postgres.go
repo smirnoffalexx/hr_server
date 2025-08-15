@@ -46,7 +46,10 @@ type ChannelRepository struct {
 }
 
 func NewChannelRepository(db *gorm.DB) *ChannelRepository {
-	db.AutoMigrate(PostgresChannel{})
+	if err := db.AutoMigrate(PostgresChannel{}); err != nil {
+		panic(err)
+	}
+
 	return &ChannelRepository{db}
 }
 
