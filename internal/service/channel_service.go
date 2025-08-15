@@ -37,13 +37,13 @@ func (s *ChannelService) GenerateChannel(channelName string) (*domain.Channel, e
 	return channel, nil
 }
 
-func (s *ChannelService) GenerateBulkChannel(channelName string, count int) ([]*domain.Channel, error) {
+func (s *ChannelService) GenerateBulkChannel(channelNames []string) ([]*domain.Channel, error) {
 	var channels []*domain.Channel
 
-	for i := 0; i < count; i++ {
+	for i, channelName := range channelNames {
 		channel, err := s.GenerateChannel(channelName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate channel code %d: %w", i+1, err)
+			return nil, fmt.Errorf("failed to generate channel code for '%s' at index %d: %w", channelName, i+1, err)
 		}
 		channels = append(channels, channel)
 	}

@@ -60,11 +60,11 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 
 // GenerateBulkChannel godoc
 // @Summary Generate multiple channel codes
-// @Description Generate multiple channel codes for a specific channel
+// @Description Generate multiple channel codes for different channel names
 // @Tags Channels
 // @Accept json
 // @Produce json
-// @Param request body dto.GenerateBulkChannelRequest true "Generate bulk channel request"
+// @Param request body dto.GenerateBulkChannelRequest true "Generate bulk channel request with array of names"
 // @Success 200 {array} domain.Channel
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
@@ -85,7 +85,7 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 			return
 		}
 
-		channels, err := c.channelService.GenerateBulkChannel(req.ChannelName, req.Count)
+		channels, err := c.channelService.GenerateBulkChannel(req.ChannelNames)
 		if err != nil {
 			logrus.Error("error while generate bulk channel: ", err)
 			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to generate bulk channel: %v", err)})

@@ -172,7 +172,7 @@ All API endpoints require the `X-Auth-Token` header for authentication.
 #### 📢 Channel Management
 - `POST /api/channel/generate` - Generate channel code
 - `GET /api/channel/{code}` - Get channel by code
-- `POST /api/admin/channel/bulk` - Generate multiple channels
+- `POST /api/admin/channel/bulk` - Generate multiple channels with different names
 - `GET /api/admin/channels` - Get all channels
 
 #### 📊 Statistics
@@ -182,6 +182,43 @@ All API endpoints require the `X-Auth-Token` header for authentication.
 
 #### 🔔 Notifications
 - `POST /api/admin/notifications` - Send notification to users
+
+### 📝 API Usage Examples
+
+#### Generate Multiple Channels with Different Names
+```bash
+curl -X POST "http://localhost:8080/api/admin/channel/bulk" \
+  -H "X-Auth-Token: your_auth_token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channel_names": [
+      "Marketing Team",
+      "Sales Department", 
+      "Engineering Team",
+      "HR Department"
+    ]
+  }'
+```
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Marketing Team",
+    "code": "a1b2c3d4",
+    "created_at": "2024-01-15T10:30:00Z",
+    "updated_at": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Sales Department",
+    "code": "e5f6g7h8",
+    "created_at": "2024-01-15T10:30:01Z",
+    "updated_at": "2024-01-15T10:30:01Z"
+  }
+]
+```
 
 ## 🤖 Telegram Bot
 
