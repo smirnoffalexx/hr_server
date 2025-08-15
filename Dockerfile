@@ -10,7 +10,7 @@ RUN go mod download && go mod verify
 COPY . .
 
 RUN go install github.com/swaggo/swag/cmd/swag@latest && \
-    swag init -g cmd/app/main.go --output internal/api/http/docs
+    swag init -g internal/api/http/routing/routing.go --output ./internal/api/http/docs
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /go/bin/app cmd/app/main.go
 
 FROM alpine:3.19

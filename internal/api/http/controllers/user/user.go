@@ -23,14 +23,13 @@ func NewUserController(sr *register.StorageRegister) *UserController {
 // GetUsers godoc
 // @Summary Get all users
 // @Description Get all registered users
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Users
 // @Accept json
 // @Produce json
 // @Success 200 {object} dto.GetUsersResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/users [get]
+// @Router /users [get]
 func (c *UserController) GetUsersHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		users, err := c.userService.GetAllUsers()

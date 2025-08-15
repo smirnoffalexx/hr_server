@@ -24,7 +24,6 @@ func NewNotificationController(sr *register.StorageRegister) *NotificationContro
 // SendNotification godoc
 // @Summary Send notification to all users
 // @Description Send a notification message to all users
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Notifications
 // @Accept json
 // @Produce json
@@ -33,7 +32,7 @@ func NewNotificationController(sr *register.StorageRegister) *NotificationContro
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/notifications [post]
+// @Router /notifications [post]
 func (c *NotificationController) SendNotificationHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewSendNotificationRequest()

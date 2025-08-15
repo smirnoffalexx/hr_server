@@ -23,7 +23,6 @@ func NewChannelController(sr *register.StorageRegister) *ChannelController {
 // GenerateChannel godoc
 // @Summary Generate a new channel code
 // @Description Generate a new channel code for a specific channel
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
@@ -32,7 +31,7 @@ func NewChannelController(sr *register.StorageRegister) *ChannelController {
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/channel/generate [post]
+// @Router /channel/generate [post]
 func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateChannelRequest()
@@ -62,7 +61,6 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 // GenerateBulkChannel godoc
 // @Summary Generate multiple channel codes
 // @Description Generate multiple channel codes for a specific channel
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
@@ -71,7 +69,7 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/channel/bulk [post]
+// @Router /channel/bulk [post]
 func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateBulkChannelRequest()
@@ -101,7 +99,6 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 // GetChannelByCode godoc
 // @Summary Get channel by code
 // @Description Get channel information by its code
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
@@ -110,7 +107,7 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 // @Failure 404 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/channel/{code} [get]
+// @Router /channel/{code} [get]
 func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		code := ctx.Param("code")
@@ -138,14 +135,13 @@ func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister
 // GetChannels godoc
 // @Summary Get all channels
 // @Description Get all Telegram channels
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Channels
 // @Accept json
 // @Produce json
 // @Success 200 {array} domain.Channel
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/channels [get]
+// @Router /channels [get]
 func (c *ChannelController) GetChannelsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		channels, err := c.channelService.GetAll()

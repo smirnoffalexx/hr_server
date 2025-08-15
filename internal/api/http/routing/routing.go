@@ -22,7 +22,7 @@ import (
 
 var ignoredPrefixPaths = []string{
 	"/api/health",
-	"/swagger",
+	"/api/swagger",
 }
 
 func GinLogrusMiddleware() gin.HandlerFunc {
@@ -74,8 +74,8 @@ func SetGinMiddlewares(router *gin.Engine) {
 // @securityDefinitions.apikey XAuthToken
 // @in header
 // @name X-Auth-Token
+// @description Enter your authentication token
 func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
-	// set route handlers
 	apiGroup := router.Group("/api")
 
 	apiGroup.GET("/health", func(ctx *gin.Context) {
@@ -85,7 +85,7 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 		})
 	})
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	apiGroup.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	apiGroup.Use(middleware.AuthTokenMiddleware(sr.Config().AuthToken))
 

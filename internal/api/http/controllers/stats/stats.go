@@ -28,14 +28,13 @@ func NewStatsController(sr *register.StorageRegister) *StatsController {
 // GetStats godoc
 // @Summary Get overall statistics
 // @Description Get overall statistics for the system
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Statistics
 // @Accept json
 // @Produce json
 // @Success 200 {object} dto.GetStatsResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/stats [get]
+// @Router /stats [get]
 func (c *StatsController) GetStatsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// This would need to be implemented to get overall stats
@@ -48,14 +47,13 @@ func (c *StatsController) GetStatsHandler(sr *register.StorageRegister) gin.Hand
 // GetChannelsStats godoc
 // @Summary Get all channels statistics
 // @Description Get statistics for all channels
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Statistics
 // @Accept json
 // @Produce json
 // @Success 200 {object} dto.GetChannelsStatsResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/stats/channels [get]
+// @Router /stats/channels [get]
 func (c *StatsController) GetChannelsStatsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// This would need to be implemented to get channel stats
@@ -68,7 +66,6 @@ func (c *StatsController) GetChannelsStatsHandler(sr *register.StorageRegister) 
 // GetChannelStats godoc
 // @Summary Get channel statistics
 // @Description Get statistics for a specific channel code
-// @param X-Auth-Token header string true "X-Auth-Token"
 // @Tags Statistics
 // @Accept json
 // @Produce json
@@ -77,7 +74,7 @@ func (c *StatsController) GetChannelsStatsHandler(sr *register.StorageRegister) 
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
-// @Router /api/stats/channel/{code} [get]
+// @Router /stats/channel/{code} [get]
 func (c *StatsController) GetChannelStatsHandler(sr *register.StorageRegister) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		code := ctx.Param("code")
