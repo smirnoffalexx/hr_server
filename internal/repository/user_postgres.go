@@ -61,7 +61,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db}
 }
 
-func (r *UserRepository) Create(telegramID int64, username string, channelID *int) (*domain.User, error) {
+func (r *UserRepository) Create(telegramID int64, username string, channelID *int) error {
 	user := &domain.User{
 		TelegramID: telegramID,
 		Username:   username,
@@ -70,10 +70,10 @@ func (r *UserRepository) Create(telegramID int64, username string, channelID *in
 
 	postgresUser := NewPostgresUser(user)
 	if err := r.db.Table(USERS_TABLE_NAME).Create(&postgresUser).Error; err != nil {
-		return nil, fmt.Errorf("failed to create user in database: %w", err)
+		return fmt.Errorf("failed to create user in database: %w", err)
 	}
 
-	return postgresUser.ToDomain(), nil
+	return nil
 }
 
 func (r *UserRepository) GetByTelegramID(telegramID int64) (*domain.User, error) {

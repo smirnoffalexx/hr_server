@@ -2,7 +2,6 @@ package background
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"hr-server/internal/register"
 	"hr-server/internal/service"
@@ -52,23 +51,20 @@ func (t *TelegramBot) Run(ctx context.Context, wg *sync.WaitGroup) {
 			}
 
 			if update.Message.IsCommand() {
-				chatID := update.Message.Chat.ID
-				msgText := ""
-				var err error
 
 				switch update.Message.Command() {
 				case "start":
-					msgText, err = t.handleStartCommand(update.Message)
-					if err != nil {
+					if err := t.handleStartCommand(update.Message); err != nil {
 						logrus.Errorf("failed to handle start command: %v", err)
 					}
 				default:
 					continue
 				}
 
+				chatID := update.Message.Chat.ID
+				msgText := "✅ Добро пожаловать!\n\n👋 Откройте Telegram mini app для продолжения."
 				msg := tgbotapi.NewMessage(chatID, msgText)
-				_, err = t.bot.Send(msg)
-				if err != nil {
+				if _, err := t.bot.Send(msg); err != nil {
 					logrus.Errorf("failed to send msg: %v", err)
 				}
 			}
@@ -76,30 +72,20 @@ func (t *TelegramBot) Run(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func (t *TelegramBot) handleStartCommand(message *tgbotapi.Message) (string, error) {
+func (t *TelegramBot) handleStartCommand(message *tgbotapi.Message) error {
 	telegramID := message.From.ID
 	username := message.From.UserName
 
 	args := strings.Fields(message.Text)
-	var channelCode *string
 	var channelID *int
 
 	if len(args) > 1 {
-		param := args[1]
+		channelCode := args[1]
 
-		if strings.Contains(param, "=") {
-			if decoded, err := base64.URLEncoding.DecodeString(param); err == nil {
-				logrus.Infof("Parsed deep link params: %+v", decoded)
-			}
-		} else {
-			channelCode = &param
-		}
-
-		if channelCode != nil {
-			channel, err := t.channelService.GetChannelByCode(*channelCode)
+		if channelCode != "" {
+			channel, err := t.channelService.GetChannelByCode(channelCode)
 			if err != nil {
-				logrus.Errorf("failed to get channel by code %s: %v", *channelCode, err)
-				return "", fmt.Errorf("failed to get channel by code %s: %v", *channelCode, err)
+				return fmt.Errorf("failed to get channel by code %s: %v", channelCode, err)
 			}
 
 			if channel != nil {
@@ -108,23 +94,9 @@ func (t *TelegramBot) handleStartCommand(message *tgbotapi.Message) (string, err
 		}
 	}
 
-	_, err := t.userService.CreateUser(telegramID, username, channelID)
-	if err != nil {
-		logrus.Errorf("failed to create/update user %d: %v", telegramID, err)
-		return "", fmt.Errorf("failed to create/update user %d: %v", telegramID, err)
+	if err := t.userService.CreateUser(telegramID, username, channelID); err != nil {
+		return fmt.Errorf("failed to create user %d: %v", telegramID, err)
 	}
 
-	code := "undefined"
-	if channelCode != nil {
-		code = *channelCode
-	}
-
-	msgText := fmt.Sprintf(
-		"✅ Добро пожаловать, %s!\n\n👋 Вы успешно зарегистрированы в системе.\n\n💡 Для подключения к каналу используйте команду:\n/start %s",
-		username,
-		code,
-	)
-
-	logrus.Infof("User %s (ID: %d) registered successfully", username, telegramID)
-	return msgText, nil
+	return nil
 }
