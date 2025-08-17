@@ -1,10 +1,9 @@
-package background
+package service
 
 import (
 	"context"
 	"fmt"
-	"hr-server/internal/register"
-	"hr-server/internal/service"
+	"hr-server/config"
 	"strings"
 	"sync"
 
@@ -12,26 +11,30 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type TelegramBot struct {
+type TelegramService struct {
 	bot            *tgbotapi.BotAPI
-	userService    *service.UserService
-	channelService *service.ChannelService
+	userService    *UserService
+	channelService *ChannelService
 }
 
-func NewTelegramBot(sr *register.StorageRegister) (*TelegramBot, error) {
-	bot, err := tgbotapi.NewBotAPI(sr.Config().TgBotToken)
+func NewTelegramService(
+	cfg *config.Config,
+	userService *UserService,
+	channelService *ChannelService,
+) (*TelegramService, error) {
+	bot, err := tgbotapi.NewBotAPI(cfg.TgBotToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create telegram bot: %w", err)
 	}
 
-	return &TelegramBot{
+	return &TelegramService{
 		bot:            bot,
-		userService:    sr.UserService(),
-		channelService: sr.ChannelService(),
+		userService:    userService,
+		channelService: channelService,
 	}, nil
 }
 
-func (t *TelegramBot) Run(ctx context.Context, wg *sync.WaitGroup) {
+func (t *TelegramService) Run(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	logrus.Info("Telegram bot started")
@@ -72,7 +75,7 @@ func (t *TelegramBot) Run(ctx context.Context, wg *sync.WaitGroup) {
 	}
 }
 
-func (t *TelegramBot) handleStartCommand(message *tgbotapi.Message) error {
+func (t *TelegramService) handleStartCommand(message *tgbotapi.Message) error {
 	telegramID := message.From.ID
 	username := message.From.UserName
 
@@ -99,4 +102,9 @@ func (t *TelegramBot) handleStartCommand(message *tgbotapi.Message) error {
 	}
 
 	return nil
+}
+
+func (t *TelegramService) SendMessage(chatID int64, message tgbotapi.Chattable) error {
+	_, err := t.bot.Send(message)
+	return err
 }

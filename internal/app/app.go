@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"hr-server/config"
 	"hr-server/internal/api/http/routing"
-	"hr-server/internal/background"
-	"hr-server/internal/register"
+	"hr-server/internal/infrastructure"
+	"hr-server/internal/repository"
+	"hr-server/internal/service"
 	"net/http"
 	"os/signal"
 	"sync"
@@ -26,25 +27,32 @@ func Run(cfg *config.Config) error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	sr, err := register.NewStorageRegister(cfg)
+	db, err := infrastructure.NewPostgresDB(cfg)
 	if err != nil {
-		return fmt.Errorf("failed to create storage register: %w", err)
+		return fmt.Errorf("failed to create postgres database: %w", err)
 	}
 
-	logrus.Info("Service started")
+	userRepository := repository.NewUserRepository(db)
+	channelRepository := repository.NewChannelRepository(db)
+
+	userService := service.NewUserService(userRepository)
+	channelService := service.NewChannelService(channelRepository)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	tgBot, err := background.NewTelegramBot(sr)
+	telegramService, err := service.NewTelegramService(cfg, userService, channelService)
 	if err != nil {
 		return fmt.Errorf("failed to create telegram bot: %w", err)
 	}
-	go tgBot.Run(ctx, &wg)
+
+	notificationService := service.NewNotificationService(userRepository, telegramService)
+
+	go telegramService.Run(ctx, &wg)
 
 	router := gin.New()
 	routing.SetGinMiddlewares(router)
-	routing.SetRouterHandler(router, sr)
+	routing.SetRouterHandler(router, cfg, userService, channelService, notificationService)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Http.Port,
@@ -56,6 +64,8 @@ func Run(cfg *config.Config) error {
 			logrus.Fatalf("http server error: %v", err)
 		}
 	}()
+
+	logrus.Info("service started")
 
 	<-ctx.Done()
 	logrus.Warn("Shutdown signal received")
@@ -69,7 +79,7 @@ func Run(cfg *config.Config) error {
 
 	wg.Wait()
 
-	logrus.Info("Service gracefully stopped")
+	logrus.Info("service gracefully stopped")
 
 	return nil
 }

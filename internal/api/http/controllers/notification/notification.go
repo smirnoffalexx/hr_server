@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"hr-server/internal/api/http/controllers/common"
 	"hr-server/internal/api/http/controllers/notification/dto"
-	"hr-server/internal/domain"
-	"hr-server/internal/register"
 	"hr-server/internal/service"
 	"net/http"
 
@@ -17,8 +15,8 @@ type NotificationController struct {
 	notificationService *service.NotificationService
 }
 
-func NewNotificationController(sr *register.StorageRegister) *NotificationController {
-	return &NotificationController{sr.NotificationService()}
+func NewNotificationController(notificationService *service.NotificationService) *NotificationController {
+	return &NotificationController{notificationService}
 }
 
 // SendNotification godoc
@@ -33,7 +31,7 @@ func NewNotificationController(sr *register.StorageRegister) *NotificationContro
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
 // @Router /notifications [post]
-func (c *NotificationController) SendNotificationHandler(sr *register.StorageRegister) gin.HandlerFunc {
+func (c *NotificationController) SendNotificationHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewSendNotificationRequest()
 		if err := req.Parse(ctx); err != nil {
@@ -48,13 +46,7 @@ func (c *NotificationController) SendNotificationHandler(sr *register.StorageReg
 			return
 		}
 
-		domainReq := &domain.SendNotificationRequest{
-			Message:  req.Message,
-			ImageURL: req.ImageURL,
-			Emoji:    req.Emoji,
-		}
-
-		err := c.notificationService.SendNotification(domainReq)
+		err := c.notificationService.SendNotification(req)
 		if err != nil {
 			logrus.Error("error while send notification: ", err)
 			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to send notification: %v", err)})

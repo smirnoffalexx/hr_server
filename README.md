@@ -17,20 +17,21 @@
 - [🤖 Telegram Bot](#-telegram-bot)
 - [🗄️ Database](#️-database)
 - [🔧 Development](#-development)
+- [🔔 Simplified Notification System](#-simplified-notification-system)
 - [🚀 Deployment](#-deployment)
 
 ## ✨ Features
 
-- 🔐 **RESTful API** with JWT authentication
+- 🔐 **RESTful API** with token-based authentication
 - 🤖 **Telegram Bot** for user registration and notifications
 - 📊 **Channel Management** with unique codes and tracking
 - 👥 **User Management** with Telegram integration
 - 📈 **Statistics & Analytics** for channels and users
-- 🔗 **Deep Link Support** for easy user onboarding
 - 📝 **Swagger Documentation** with interactive API testing
 - 🗄️ **PostgreSQL Database** with GORM ORM
-- 🛡️ **Error Handling** with comprehensive logging
+- 🛡️ **Error Handling** with comprehensive error wrapping
 - 🚀 **Docker Support** for easy deployment
+- 🔔 **Simplified Notification System** - send to ALL users, no exceptions
 
 ## 🏗️ Architecture
 
@@ -52,6 +53,14 @@
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+### Key Design Principles
+- **Domain-Driven Design**: Models separated into `domain/` package
+- **DTO Pattern**: Request/Response models in controller-specific DTO folders
+- **Repository Pattern**: Data access abstraction
+- **Service Layer**: Business logic encapsulation
+- **Error Wrapping**: Comprehensive error context preservation
+- **Simplified Notifications**: Single method to send to ALL users
 
 ## 🚀 Quick Start
 
@@ -145,12 +154,8 @@ go build -o bin/hr_server cmd/app/main.go
 ### Docker Setup
 
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d
-
-# Or build manually
 docker build -t hr-server .
-docker run -p 8080:8080 hr-server
+docker-compose up -d
 ```
 
 ## 📚 API Documentation
@@ -181,62 +186,55 @@ All API endpoints require the `X-Auth-Token` header for authentication.
 - `GET /api/stats/channel/{code}` - Get specific channel stats
 
 #### 🔔 Notifications
-- `POST /api/admin/notifications` - Send notification to users
+- `POST /api/notifications` - Send notification to ALL users (no exceptions, no filters)
 
 ### 📝 API Usage Examples
 
-#### Generate Multiple Channels with Different Names
+#### Send Notification to ALL Users
 ```bash
-curl -X POST "http://localhost:8080/api/admin/channel/bulk" \
+curl -X POST "http://localhost:8080/api/notifications" \
   -H "X-Auth-Token: your_auth_token" \
   -H "Content-Type: application/json" \
   -d '{
-    "channel_names": [
-      "Marketing Team",
-      "Sales Department", 
-      "Engineering Team",
-      "HR Department"
-    ]
+    "message": "🎉 Welcome to our platform!",
+    "emoji": "🚀",
+    "image_url": "https://example.com/welcome.jpg"
   }'
 ```
 
 **Response:**
 ```json
-[
-  {
-    "id": 1,
-    "name": "Marketing Team",
-    "code": "a1b2c3d4",
-    "created_at": "2024-01-15T10:30:00Z",
-    "updated_at": "2024-01-15T10:30:00Z"
-  },
-  {
-    "id": 2,
-    "name": "Sales Department",
-    "code": "e5f6g7h8",
-    "created_at": "2024-01-15T10:30:01Z",
-    "updated_at": "2024-01-15T10:30:01Z"
-  }
-]
+{
+  "message": "Success"
+}
 ```
+
+**What happens:**
+1. ✅ Loads ALL users from database in batches of 20
+2. ✅ Creates jobs for EVERY user (no filters, no exceptions)
+3. ✅ Uses 5 workers for concurrent processing
+4. ✅ Sends to absolutely everyone in the system
+5. ✅ Rate limiting: 1 second between messages
 
 ## 🤖 Telegram Bot
 
 ### Features
 - **User Registration**: `/start [channel_code]`
-- **Deep Link Support**: Handle complex parameters
 - **Channel Association**: Link users to specific channels
 - **Error Handling**: Graceful handling of invalid codes
+- **User Tracking**: Monitor user engagement and channel usage
 
 ### Bot Commands
 ```
 /start [channel_code] - Register user and associate with channel
 ```
 
-### Deep Link Format
-```
-https://t.me/YourBot?start=eyJjaGFubmVsQ29kZSI6IkFCQzEyMyJ9
-```
+### How It Works
+1. **User starts bot** with `/start` or `/start [code]` (Link format: `https://t.me/YourBot?start=eyJjaGFubmVsQ29kZSI6IkFCQzEyMyJ9`)
+2. **Bot validates** channel code if provided
+3. **User is saved** regardless of code validity
+4. **Channel association** is created if code is valid
+5. **Welcome message** is sent to user
 
 ## 🗄️ Database
 
@@ -273,41 +271,52 @@ CREATE TABLE channels (
 hr_server/
 ├── cmd/
 │   └── app/
-│       └── main.go              # Application entry point
+│       └── main.go                    # Application entry point
 ├── config/
-│   └── config.go                # Configuration management
+│   └── config.go                      # Configuration management
 ├── internal/
 │   ├── api/
 │   │   └── http/
-│   │       ├── controllers/     # HTTP controllers
-│   │       ├── middleware/      # HTTP middleware
-│   │       ├── routing/         # Route definitions
-│   │       └── docs/            # Swagger documentation
+│   │       ├── controllers/           # HTTP controllers with DTOs
+│   │       │   ├── user/             # User controller + DTOs
+│   │       │   ├── channel/          # Channel controller + DTOs
+│   │       │   ├── notification/     # Notification controller + DTOs
+│   │       │   ├── stats/            # Statistics controller + DTOs
+│   │       │   └── common/           # Common response types
+│   │       ├── middleware/            # HTTP middleware (auth)
+│   │       └── routing/               # Route definitions
 │   ├── app/
-│   │   ├── app.go              # Application setup
-│   │   └── logger.go           # Logging configuration
+│   │   ├── app.go                    # Application setup
+│   │   └── logger.go                 # Logging configuration
 │   ├── background/
-│   │   └── tgbot.go            # Telegram bot worker
-│   ├── domain/
-│   │   ├── user.go             # User domain model
-│   │   ├── channel.go          # Channel domain model
-│   │   └── notification.go     # Notification domain model
+│   │   └── tgbot.go                  # Telegram bot worker
+│   ├── domain/                       # Domain models (business entities)
+│   │   ├── user.go                   # User domain model
+│   │   ├── channel.go                # Channel domain model
+│   │   ├── notification.go           # Notification domain model
+│   │   ├── pledge.go                 # Pledge domain model
+│   │   ├── setting.go                # Setting domain model
+│   │   ├── tx.go                     # Transaction domain model
+│   │   └── wallet.go                 # Wallet domain model
 │   ├── infrastructure/
-│   │   └── database.go         # Database connection
+│   │   └── database.go               # Database connection
 │   ├── register/
-│   │   └── storage.go          # Dependency injection
-│   ├── repository/
-│   │   ├── user_postgres.go    # User repository
-│   │   └── channel_postgres.go # Channel repository
-│   └── service/
-│       ├── user_service.go     # User business logic
-│       ├── channel_service.go  # Channel business logic
-│       └── notification_service.go # Notification logic
-├── Dockerfile                   # Docker configuration
-├── docker-compose.yml          # Docker Compose setup
-├── go.mod                      # Go modules
-├── go.sum                      # Go modules checksum
-└── README.md                   # This file
+│   │   └── storage.go                # Dependency injection
+│   ├── repository/                   # Data access layer
+│   │   ├── user_postgres.go          # User repository
+│   │   ├── channel_postgres.go       # Channel repository
+│   │   ├── pledge_postgres.go        # Pledge repository
+│   │   ├── setting_postgres.go       # Setting repository
+│   │   ├── tx_postgres.go            # Transaction repository
+│   │   └── wallet_postgres.go        # Wallet repository
+│   └── service/                      # Business logic layer
+│       ├── user_service.go           # User business logic
+│       ├── channel_service.go        # Channel business logic
+│       └── notification_service.go   # Simplified notification system
+├── Dockerfile                         # Docker configuration
+├── go.mod                            # Go modules
+├── go.sum                            # Go modules checksum
+└── README.md                         # This file
 ```
 
 ### Development Commands

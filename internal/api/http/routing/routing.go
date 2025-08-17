@@ -2,13 +2,13 @@ package routing
 
 import (
 	"bytes"
+	"hr-server/config"
 	"hr-server/internal/api/http/controllers/channel"
 	"hr-server/internal/api/http/controllers/notification"
-	"hr-server/internal/api/http/controllers/stats"
 	"hr-server/internal/api/http/controllers/user"
 	_ "hr-server/internal/api/http/docs"
 	"hr-server/internal/api/http/middleware"
-	"hr-server/internal/register"
+	"hr-server/internal/service"
 	"io"
 	"net/http"
 	"strings"
@@ -75,7 +75,13 @@ func SetGinMiddlewares(router *gin.Engine) {
 // @in header
 // @name X-Auth-Token
 // @description Enter your authentication token
-func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
+func SetRouterHandler(
+	router *gin.Engine,
+	cfg *config.Config,
+	userService *service.UserService,
+	channelService *service.ChannelService,
+	notificationService *service.NotificationService,
+) {
 	apiGroup := router.Group("/api")
 
 	apiGroup.GET("/health", func(ctx *gin.Context) {
@@ -87,30 +93,23 @@ func SetRouterHandler(router *gin.Engine, sr *register.StorageRegister) {
 
 	apiGroup.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	apiGroup.Use(middleware.AuthTokenMiddleware(sr.Config().AuthToken))
+	apiGroup.Use(middleware.AuthTokenMiddleware(cfg.AuthToken))
 
 	// User routes
 	userGroup := apiGroup.Group("/users")
-	userController := user.NewUserController(sr)
-	userGroup.GET("/", userController.GetUsersHandler(sr))
+	userController := user.NewUserController(userService)
+	userGroup.GET("/", userController.GetUsersHandler())
 
 	// Channel routes
 	channelGroup := apiGroup.Group("/channels")
-	channelController := channel.NewChannelController(sr)
-	channelGroup.POST("/generate", channelController.GenerateChannelHandler(sr))
-	channelGroup.GET("/:code", channelController.GetChannelByCodeHandler(sr))
-	channelGroup.POST("/bulk", channelController.GenerateBulkChannelHandler(sr))
-	channelGroup.GET("/all", channelController.GetChannelsHandler(sr))
+	channelController := channel.NewChannelController(channelService)
+	channelGroup.POST("/generate", channelController.GenerateChannelHandler())
+	channelGroup.GET("/:code", channelController.GetChannelByCodeHandler())
+	channelGroup.POST("/bulk", channelController.GenerateBulkChannelHandler())
+	channelGroup.GET("/all", channelController.GetChannelsHandler())
 
 	// Notification routes
 	notificationGroup := apiGroup.Group("/notifications")
-	notificationController := notification.NewNotificationController(sr)
-	notificationGroup.POST("/", notificationController.SendNotificationHandler(sr))
-
-	// Stats routes
-	statsGroup := apiGroup.Group("/stats")
-	statsController := stats.NewStatsController(sr)
-	statsGroup.GET("/channels", statsController.GetChannelsStatsHandler(sr))
-	statsGroup.GET("/channel/:code", statsController.GetChannelStatsHandler(sr))
-	statsGroup.GET("/all", statsController.GetStatsHandler(sr))
+	notificationController := notification.NewNotificationController(notificationService)
+	notificationGroup.POST("/", notificationController.SendNotificationHandler())
 }

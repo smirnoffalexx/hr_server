@@ -118,3 +118,22 @@ func (r *UserRepository) GetByChannel(channelID int) ([]*domain.User, error) {
 
 	return users, nil
 }
+
+func (r *UserRepository) GetAllInBatches(batchSize int, callback func([]*domain.User) error) error {
+	var postgresUsers []PostgresUser
+
+	result := r.db.Table(USERS_TABLE_NAME).FindInBatches(&postgresUsers, batchSize, func(tx *gorm.DB, batch int) error {
+		var users []*domain.User
+		for _, pu := range postgresUsers {
+			users = append(users, pu.ToDomain())
+		}
+
+		if err := callback(users); err != nil {
+			return fmt.Errorf("callback error in batch %d: %w", batch, err)
+		}
+
+		return nil
+	})
+
+	return result.Error
+}

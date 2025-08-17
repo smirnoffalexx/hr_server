@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"hr-server/internal/api/http/controllers/common"
 	"hr-server/internal/api/http/controllers/user/dto"
-	"hr-server/internal/register"
 	"hr-server/internal/service"
 	"net/http"
 
@@ -16,8 +15,8 @@ type UserController struct {
 	userService *service.UserService
 }
 
-func NewUserController(sr *register.StorageRegister) *UserController {
-	return &UserController{sr.UserService()}
+func NewUserController(userService *service.UserService) *UserController {
+	return &UserController{userService}
 }
 
 // GetUsers godoc
@@ -30,7 +29,7 @@ func NewUserController(sr *register.StorageRegister) *UserController {
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
 // @Router /users [get]
-func (c *UserController) GetUsersHandler(sr *register.StorageRegister) gin.HandlerFunc {
+func (c *UserController) GetUsersHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		users, err := c.userService.GetAllUsers()
 		if err != nil {

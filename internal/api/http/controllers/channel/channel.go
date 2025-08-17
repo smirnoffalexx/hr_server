@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"hr-server/internal/api/http/controllers/channel/dto"
 	"hr-server/internal/api/http/controllers/common"
-	"hr-server/internal/register"
 	"hr-server/internal/service"
 	"net/http"
 
@@ -16,8 +15,8 @@ type ChannelController struct {
 	channelService *service.ChannelService
 }
 
-func NewChannelController(sr *register.StorageRegister) *ChannelController {
-	return &ChannelController{sr.ChannelService()}
+func NewChannelController(channelService *service.ChannelService) *ChannelController {
+	return &ChannelController{channelService}
 }
 
 // GenerateChannel godoc
@@ -32,7 +31,7 @@ func NewChannelController(sr *register.StorageRegister) *ChannelController {
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
 // @Router /channels/generate [post]
-func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
+func (c *ChannelController) GenerateChannelHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateChannelRequest()
 		if err := req.Parse(ctx); err != nil {
@@ -70,7 +69,7 @@ func (c *ChannelController) GenerateChannelHandler(sr *register.StorageRegister)
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
 // @Router /channels/bulk [post]
-func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegister) gin.HandlerFunc {
+func (c *ChannelController) GenerateBulkChannelHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := dto.NewGenerateBulkChannelRequest()
 		if err := req.Parse(ctx); err != nil {
@@ -108,7 +107,7 @@ func (c *ChannelController) GenerateBulkChannelHandler(sr *register.StorageRegis
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
 // @Router /channels/{code} [get]
-func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister) gin.HandlerFunc {
+func (c *ChannelController) GetChannelByCodeHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		code := ctx.Param("code")
 		if code == "" {
@@ -142,7 +141,7 @@ func (c *ChannelController) GetChannelByCodeHandler(sr *register.StorageRegister
 // @Failure 500 {object} common.ErrorResponse
 // @Security XAuthToken
 // @Router /channels/all [get]
-func (c *ChannelController) GetChannelsHandler(sr *register.StorageRegister) gin.HandlerFunc {
+func (c *ChannelController) GetChannelsHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		channels, err := c.channelService.GetAll()
 		if err != nil {
