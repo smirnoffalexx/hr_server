@@ -37,7 +37,7 @@ func NewTelegramService(
 func (t *TelegramService) Run(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	logrus.Info("Telegram bot started")
+	logrus.Info("telegram bot started")
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -46,7 +46,7 @@ func (t *TelegramService) Run(ctx context.Context, wg *sync.WaitGroup) {
 	for {
 		select {
 		case <-ctx.Done():
-			logrus.Info("Telegram bot stopped")
+			logrus.Info("telegram bot stopped")
 			return
 		case update := <-updates:
 			if update.Message == nil {
@@ -54,7 +54,6 @@ func (t *TelegramService) Run(ctx context.Context, wg *sync.WaitGroup) {
 			}
 
 			if update.Message.IsCommand() {
-
 				switch update.Message.Command() {
 				case "start":
 					if err := t.handleStartCommand(update.Message); err != nil {

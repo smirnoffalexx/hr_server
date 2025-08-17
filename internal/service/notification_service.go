@@ -4,7 +4,6 @@ import (
 	"log"
 	"time"
 
-	"hr-server/internal/api/http/controllers/notification/dto"
 	"hr-server/internal/domain"
 	"hr-server/internal/repository"
 
@@ -12,7 +11,7 @@ import (
 )
 
 const (
-	DefaultMessageInterval = 1 * time.Second
+	DefaultMessageInterval = 100 * time.Millisecond
 	DefaultBatchSize       = 20
 	DefaultWorkerCount     = 5
 )
@@ -26,7 +25,6 @@ type NotificationJob struct {
 	User     *domain.User
 	Message  string
 	ImageURL *string
-	Emoji    *string
 }
 
 func NewNotificationService(
@@ -40,13 +38,13 @@ func NewNotificationService(
 }
 
 // SendNotification sends notification to ALL users without any exceptions or filters
-func (s *NotificationService) SendNotification(req *dto.SendNotificationRequest) error {
+func (s *NotificationService) SendNotification(data *domain.NotificationData) error {
 	// Create jobs channel with reasonable capacity
 	jobs := make(chan NotificationJob, DefaultBatchSize)
 
 	// Start workers
 	for w := 1; w <= DefaultWorkerCount; w++ {
-		go s.worker(w, jobs)
+		go s.worker(jobs)
 	}
 
 	// Start a goroutine to load users in batches and send jobs
@@ -59,9 +57,8 @@ func (s *NotificationService) SendNotification(req *dto.SendNotificationRequest)
 				// Send to ALL users without any filters
 				jobs <- NotificationJob{
 					User:     user,
-					Message:  req.Message,
-					ImageURL: req.ImageURL,
-					Emoji:    req.Emoji,
+					Message:  data.Message,
+					ImageURL: data.ImageURL,
 				}
 			}
 			return nil
@@ -76,34 +73,22 @@ func (s *NotificationService) SendNotification(req *dto.SendNotificationRequest)
 }
 
 // worker processes notification jobs
-func (s *NotificationService) worker(id int, jobs <-chan NotificationJob) {
-
+func (s *NotificationService) worker(jobs <-chan NotificationJob) {
 	for job := range jobs {
-		log.Printf("[Worker %d] Sending notification to user %d (@%s)",
-			id, job.User.TelegramID, job.User.Username)
-
-		// Add emoji to message if provided
-		message := job.Message
-		if job.Emoji != nil {
-			message = *job.Emoji + " " + message
-		}
-
 		var err error
 		if job.ImageURL != nil && *job.ImageURL != "" {
 			photo := tgbotapi.NewPhoto(job.User.TelegramID, tgbotapi.FileURL(*job.ImageURL))
-			photo.Caption = message
+			photo.Caption = job.Message
 			photo.ParseMode = "Markdown"
 			err = s.telegramService.SendMessage(job.User.TelegramID, photo)
 		} else {
-			msg := tgbotapi.NewMessage(job.User.TelegramID, message)
+			msg := tgbotapi.NewMessage(job.User.TelegramID, job.Message)
 			msg.ParseMode = "Markdown"
 			err = s.telegramService.SendMessage(job.User.TelegramID, msg)
 		}
 
 		if err != nil {
 			log.Printf("failed to send to user %d: %v", job.User.TelegramID, err)
-		} else {
-			log.Printf("successfully sent to user %d", job.User.TelegramID)
 		}
 
 		// Rate limiting to avoid hitting Telegram API limits

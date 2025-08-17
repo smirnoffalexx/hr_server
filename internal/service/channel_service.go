@@ -31,9 +31,6 @@ func (s *ChannelService) GenerateChannel(channelName string) (*domain.Channel, e
 		return nil, fmt.Errorf("failed to create channel: %w", err)
 	}
 
-	// Log the channel creation
-	fmt.Printf("🎯 New Channel Code: %s\n\nUse this code to track your visits!\n\nBot: @YourBotName\nStart command: /start %s", code, code)
-
 	return channel, nil
 }
 

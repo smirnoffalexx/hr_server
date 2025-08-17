@@ -47,10 +47,10 @@
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
 │  │ Controllers │  │   Services  │  │ Repositories│              │
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   Domain    │  │ Middleware  │  │ Background  │              │
-│  │   Models    │  │             │  │   Workers   │              │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │
+│  ┌─────────────┐  ┌─────────────┐                               │
+│  │   Domain    │  │ Middleware  │                               │
+│  │   Models    │  │             │                               │
+│  └─────────────┘  └─────────────┘                               │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -171,19 +171,13 @@ docker-compose up -d
 All API endpoints require the `X-Auth-Token` header for authentication.
 
 #### 👥 User Management
-- `GET /api/admin/users` - Get all users
-- `POST /api/admin/users` - Create new user
+- `GET /api/users` - Get all users
 
 #### 📢 Channel Management
 - `POST /api/channel/generate` - Generate channel code
 - `GET /api/channel/{code}` - Get channel by code
-- `POST /api/admin/channel/bulk` - Generate multiple channels with different names
-- `GET /api/admin/channels` - Get all channels
-
-#### 📊 Statistics
-- `GET /api/admin/stats` - Get overall statistics
-- `GET /api/stats/channels` - Get channel statistics
-- `GET /api/stats/channel/{code}` - Get specific channel stats
+- `POST /api/channel/bulk` - Generate multiple channels with different names
+- `GET /api/channels` - Get all channels
 
 #### 🔔 Notifications
 - `POST /api/notifications` - Send notification to ALL users (no exceptions, no filters)
@@ -197,16 +191,13 @@ curl -X POST "http://localhost:8080/api/notifications" \
   -H "Content-Type: application/json" \
   -d '{
     "message": "🎉 Welcome to our platform!",
-    "emoji": "🚀",
     "image_url": "https://example.com/welcome.jpg"
   }'
 ```
 
 **Response:**
 ```json
-{
-  "message": "Success"
-}
+{}
 ```
 
 **What happens:**
@@ -214,7 +205,7 @@ curl -X POST "http://localhost:8080/api/notifications" \
 2. ✅ Creates jobs for EVERY user (no filters, no exceptions)
 3. ✅ Uses 5 workers for concurrent processing
 4. ✅ Sends to absolutely everyone in the system
-5. ✅ Rate limiting: 1 second between messages
+5. ✅ Rate limiting: 200 ms second between messages for each worker
 
 ## 🤖 Telegram Bot
 
@@ -281,39 +272,27 @@ hr_server/
 │   │       │   ├── user/             # User controller + DTOs
 │   │       │   ├── channel/          # Channel controller + DTOs
 │   │       │   ├── notification/     # Notification controller + DTOs
-│   │       │   ├── stats/            # Statistics controller + DTOs
 │   │       │   └── common/           # Common response types
-│   │       ├── middleware/            # HTTP middleware (auth)
-│   │       └── routing/               # Route definitions
+│   │       ├── middleware/           # HTTP middleware (auth)
+│   │       └── routing/              # Route definitions
 │   ├── app/
 │   │   ├── app.go                    # Application setup
 │   │   └── logger.go                 # Logging configuration
-│   ├── background/
-│   │   └── tgbot.go                  # Telegram bot worker
 │   ├── domain/                       # Domain models (business entities)
 │   │   ├── user.go                   # User domain model
 │   │   ├── channel.go                # Channel domain model
-│   │   ├── notification.go           # Notification domain model
-│   │   ├── pledge.go                 # Pledge domain model
-│   │   ├── setting.go                # Setting domain model
-│   │   ├── tx.go                     # Transaction domain model
-│   │   └── wallet.go                 # Wallet domain model
+│   │   ├── notification.go           # Notification data
 │   ├── infrastructure/
 │   │   └── database.go               # Database connection
-│   ├── register/
-│   │   └── storage.go                # Dependency injection
 │   ├── repository/                   # Data access layer
 │   │   ├── user_postgres.go          # User repository
 │   │   ├── channel_postgres.go       # Channel repository
-│   │   ├── pledge_postgres.go        # Pledge repository
-│   │   ├── setting_postgres.go       # Setting repository
-│   │   ├── tx_postgres.go            # Transaction repository
-│   │   └── wallet_postgres.go        # Wallet repository
 │   └── service/                      # Business logic layer
 │       ├── user_service.go           # User business logic
 │       ├── channel_service.go        # Channel business logic
-│       └── notification_service.go   # Simplified notification system
-├── Dockerfile                         # Docker configuration
+│       ├── telegram_service.go       # Telegram integration logic
+│       └── notification_service.go   # Notification logic
+├── Dockerfile                        # Docker configuration
 ├── go.mod                            # Go modules
 ├── go.sum                            # Go modules checksum
 └── README.md                         # This file

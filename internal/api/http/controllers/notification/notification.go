@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hr-server/internal/api/http/controllers/common"
 	"hr-server/internal/api/http/controllers/notification/dto"
+	"hr-server/internal/domain"
 	"hr-server/internal/service"
 	"net/http"
 
@@ -46,7 +47,12 @@ func (c *NotificationController) SendNotificationHandler() gin.HandlerFunc {
 			return
 		}
 
-		err := c.notificationService.SendNotification(req)
+		data := &domain.NotificationData{
+			Message:  req.Message,
+			ImageURL: req.ImageURL,
+		}
+
+		err := c.notificationService.SendNotification(data)
 		if err != nil {
 			logrus.Error("error while send notification: ", err)
 			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to send notification: %v", err)})
