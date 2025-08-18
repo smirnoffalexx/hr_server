@@ -21,7 +21,7 @@ func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
 		cfg.Postgres.PASSWORD,
 		cfg.Postgres.DB,
 		cfg.Postgres.PORT,
-		"disable",
+		cfg.Postgres.SSLMODE,
 	)
 
 	newLogger := logger.New(
