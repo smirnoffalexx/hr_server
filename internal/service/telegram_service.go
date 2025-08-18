@@ -15,6 +15,7 @@ type TelegramService struct {
 	bot            *tgbotapi.BotAPI
 	userService    *UserService
 	channelService *ChannelService
+	webAppURL      string
 }
 
 func NewTelegramService(
@@ -31,6 +32,7 @@ func NewTelegramService(
 		bot:            bot,
 		userService:    userService,
 		channelService: channelService,
+		webAppURL:      cfg.TgWebAppURL,
 	}, nil
 }
 
@@ -64,8 +66,17 @@ func (t *TelegramService) Run(ctx context.Context, wg *sync.WaitGroup) {
 				}
 
 				chatID := update.Message.Chat.ID
-				msgText := "✅ Добро пожаловать!\n\n👋 Откройте Telegram mini app для продолжения."
+				msgText := "Жми на Играть, запускай игру и забирай приз!"
 				msg := tgbotapi.NewMessage(chatID, msgText)
+
+				if t.webAppURL != "" {
+					button := tgbotapi.InlineKeyboardButton{Text: "Играть!", URL: &t.webAppURL}
+					keyboard := tgbotapi.NewInlineKeyboardMarkup(
+						tgbotapi.NewInlineKeyboardRow(button),
+					)
+					msg.ReplyMarkup = keyboard
+				}
+
 				if _, err := t.bot.Send(msg); err != nil {
 					logrus.Errorf("failed to send msg: %v", err)
 				}
