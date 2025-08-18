@@ -99,6 +99,7 @@ func SetRouterHandler(
 	userGroup := apiGroup.Group("/users")
 	userController := user.NewUserController(userService)
 	userGroup.GET("/", userController.GetUsersHandler())
+	userGroup.GET("/export", userController.ExportUsersHandler())
 
 	// Channel routes
 	channelGroup := apiGroup.Group("/channels")
