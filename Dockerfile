@@ -1,6 +1,4 @@
-FROM --platform=linux/amd64 golang:1.24-alpine AS build
-
-RUN apk add --no-cache git ca-certificates tzdata
+FROM golang:1.24-alpine AS build
 
 WORKDIR /src
 
