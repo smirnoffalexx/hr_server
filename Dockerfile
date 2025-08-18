@@ -1,27 +1,21 @@
-FROM golang:1.24-alpine AS build
+FROM golang:1.24.3-alpine AS build
 
 WORKDIR /src
 
-COPY go.mod go.sum ./
-RUN go mod download && go mod verify
-
 COPY . .
+
+RUN go mod download
 
 RUN go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g internal/api/http/routing/routing.go --output ./internal/api/http/docs
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o /go/bin/app cmd/app/main.go
 
-FROM alpine:3.19
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server ./cmd/app/main.go
 
-RUN apk add --no-cache ca-certificates tzdata && \
-    mkdir -p /hr-server
+FROM alpine:latest
 
-COPY --from=build /go/bin/app /hr-server/app
-
-WORKDIR /hr-server
-
-ENV TZ=UTC
+WORKDIR /app
+COPY --from=build /src/server /app/server
 
 EXPOSE 8080
 
-CMD ["/hr-server/app"]
+ENTRYPOINT ["/app/server"]
