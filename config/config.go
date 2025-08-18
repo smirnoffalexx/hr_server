@@ -9,9 +9,10 @@ type Config struct {
 
 	AuthToken string
 
-	TgBotToken string
-
-	TgWebAppURL string
+	TgBot struct {
+		Token string
+		URL   string
+	}
 
 	Postgres struct {
 		HOST, PORT, USER, PASSWORD, DB, SSLMODE string
@@ -44,9 +45,8 @@ func LoadConfig() (*Config, error) {
 
 	cfg.AuthToken = os.Getenv("AUTH_TOKEN")
 
-	cfg.TgBotToken = os.Getenv("TG_BOT_TOKEN")
-
-	cfg.TgWebAppURL = os.Getenv("TG_WEBAPP_URL")
+	cfg.TgBot.Token = os.Getenv("TG_BOT_TOKEN")
+	cfg.TgBot.URL = os.Getenv("TG_BOT_URL")
 
 	return &cfg, nil
 }

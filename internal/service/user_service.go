@@ -49,3 +49,7 @@ func (s *UserService) GetAllUsers() ([]*domain.User, error) {
 func (s *UserService) GetUsersByChannel(channelID int) ([]*domain.User, error) {
 	return s.userRepo.GetByChannel(channelID)
 }
+
+func (s *UserService) GetAllUsersWithChannel() ([]*domain.UserWithChannel, error) {
+	return s.userRepo.GetAllWithChannel()
+}

@@ -9,4 +9,5 @@ type Channel struct {
 	Code      string    `json:"code"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	Link      string    `json:"link"`
 }

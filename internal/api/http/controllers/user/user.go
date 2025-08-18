@@ -31,10 +31,13 @@ func NewUserController(userService *service.UserService) *UserController {
 // @Router /users [get]
 func (c *UserController) GetUsersHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		users, err := c.userService.GetAllUsers()
+		users, err := c.userService.GetAllUsersWithChannel()
 		if err != nil {
 			logrus.Error("error while get all users: ", err)
-			ctx.JSON(http.StatusInternalServerError, common.ErrorResponse{Error: fmt.Sprintf("failed to get all users: %v", err)})
+			ctx.JSON(
+				http.StatusInternalServerError,
+				common.ErrorResponse{Error: fmt.Sprintf("failed to get all users: %v", err)},
+			)
 			return
 		}
 

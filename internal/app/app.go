@@ -36,7 +36,7 @@ func Run(cfg *config.Config) error {
 	channelRepository := repository.NewChannelRepository(db)
 
 	userService := service.NewUserService(userRepository)
-	channelService := service.NewChannelService(channelRepository)
+	channelService := service.NewChannelService(cfg, channelRepository)
 
 	var wg sync.WaitGroup
 	wg.Add(1)

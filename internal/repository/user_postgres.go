@@ -104,6 +104,20 @@ func (r *UserRepository) GetAll() ([]*domain.User, error) {
 	return users, nil
 }
 
+func (r *UserRepository) GetAllWithChannel() ([]*domain.UserWithChannel, error) {
+	var users []*domain.UserWithChannel
+
+	err := r.db.Table(USERS_TABLE_NAME).
+		Select("users.*, channels.name as channel_name").
+		Joins("LEFT JOIN channels ON users.channel_id = channels.id").
+		Order("users.created_at DESC").Scan(&users).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all users with channel names: %w", err)
+	}
+
+	return users, nil
+}
+
 func (r *UserRepository) GetByChannel(channelID int) ([]*domain.User, error) {
 	var postgresUsers []PostgresUser
 

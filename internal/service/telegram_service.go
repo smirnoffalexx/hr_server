@@ -23,7 +23,7 @@ func NewTelegramService(
 	userService *UserService,
 	channelService *ChannelService,
 ) (*TelegramService, error) {
-	bot, err := tgbotapi.NewBotAPI(cfg.TgBotToken)
+	bot, err := tgbotapi.NewBotAPI(cfg.TgBot.Token)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create telegram bot: %w", err)
 	}
@@ -32,7 +32,7 @@ func NewTelegramService(
 		bot:            bot,
 		userService:    userService,
 		channelService: channelService,
-		webAppURL:      cfg.TgWebAppURL,
+		webAppURL:      cfg.TgBot.URL + "?startapp",
 	}, nil
 }
 

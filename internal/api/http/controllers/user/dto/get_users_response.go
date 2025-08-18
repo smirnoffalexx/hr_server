@@ -5,10 +5,10 @@ import (
 )
 
 type GetUsersResponse struct {
-	Users []*domain.User `json:"users"`
+	Users []*domain.UserWithChannel `json:"users"`
 }
 
-func NewGetUsersResponse(users []*domain.User) *GetUsersResponse {
+func NewGetUsersResponse(users []*domain.UserWithChannel) *GetUsersResponse {
 	return &GetUsersResponse{
 		Users: users,
 	}

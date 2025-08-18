@@ -4,17 +4,20 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"hr-server/config"
 	"hr-server/internal/domain"
 	"hr-server/internal/repository"
 )
 
 type ChannelService struct {
-	channelRepo *repository.ChannelRepository
+	channelRepo   *repository.ChannelRepository
+	tgBotStartURL string
 }
 
-func NewChannelService(channelRepo *repository.ChannelRepository) *ChannelService {
+func NewChannelService(cfg *config.Config, channelRepo *repository.ChannelRepository) *ChannelService {
 	return &ChannelService{
-		channelRepo: channelRepo,
+		channelRepo:   channelRepo,
+		tgBotStartURL: cfg.TgBot.URL + "?start=",
 	}
 }
 
@@ -30,6 +33,8 @@ func (s *ChannelService) GenerateChannel(channelName string) (*domain.Channel, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to create channel: %w", err)
 	}
+
+	channel.Link = s.tgBotStartURL + channel.Code
 
 	return channel, nil
 }
